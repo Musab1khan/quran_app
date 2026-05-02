@@ -95,29 +95,6 @@ bench restart
 
 ---
 
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-This app uses `pre-commit` for code formatting:
-
-```bash
-cd apps/quran_app
-pre-commit install
-```
-
-Pre-commit tools:
-- ruff (Python linting)
-- eslint (JavaScript)
-- prettier (Formatting)
-
----
-
 ## Author
 
 **Umair Wali**
@@ -126,20 +103,3 @@ Pre-commit tools:
 
 This application is dedicated to my beloved father (abu). May Allah grant him the highest rank in Jannah. Ameen.
 
----
-
-## License
-
-MIT License - see [license.txt](license.txt) for details
-
----
-
-## Acknowledgments
-
-- **Quran data**: [Source of your Quran data]
-- **Frappe Framework**: [https://frappeframework.com](https://frappeframework.com)
-- **Translation**: [Source of translations if any]
-
----
-
-*"Indeed, it is We who sent down the Qur'an, and indeed, We will be its guardian."* - Al-Hijr 15:9
