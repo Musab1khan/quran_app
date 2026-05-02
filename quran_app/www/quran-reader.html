@@ -9,6 +9,12 @@
         .quran-layout { display: flex; min-height: 100vh; }
         .col-sidebar { width: 280px; min-width: 280px; background: #fff; padding: 15px; border-right: 1px solid #ddd; }
         .col-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .audio-controls { display: flex; align-items: center; gap: 8px; margin-left: 15px; }
+        .audio-controls select { padding: 5px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fff; }
+        .ayah-audio-btn { background: #17a2b8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 10px; }
+        .ayah-audio-btn:hover { background: #138496; }
+        .ayah-audio-btn.playing { background: #dc3545; }
+        .ayah-header { display: flex; align-items: center; justify-content: space-between; }
         .sidebar { height: 100vh; overflow-y: auto; }
         .search-box { margin-bottom: 15px; }
         .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px; }
@@ -24,7 +30,7 @@
         .w-100 { width: 100%; }
         .mb-2 { margin-bottom: 10px; }
         .mb-3 { margin-bottom: 15px; }
-        .mt-2 { margin-top: 10px; }
+        .tajweed-toggle { margin-left: 10px; display: flex; gap: 5px; }
         .p-2 { padding: 10px; }
         .p-3 { padding: 15px; }
         .p-4 { padding: 20px; }
@@ -49,6 +55,12 @@
         .reading-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .reading-modes { margin: 0 15px; }
         #current-position { font-size: 14px; }
+        .bookmarks-box, .stats-box, .last-read-box { border: 1px solid #dee2e6; border-radius: 5px; }
+        .bookmarks-list { font-size: 11px; }
+        .bookmark-item:hover { background: #f8f9fa; }
+        .progress { background: #e9ecef; border-radius: 3px; }
+        .progress-bar { background: #28a745; transition: width 0.3s ease; }
+        .btn-xs { padding: 2px 6px; font-size: 10px; }
         .ayah-display { min-height: 400px; }
         .book-page { background: linear-gradient(to right, #fff 0%, #fafafa 50%, #fff 100%); padding: 30px; border-radius: 10px; box-shadow: inset 0 0 50px rgba(0,0,0,0.05); }
         .book-ayah { border-bottom: 1px dashed #e0e0e0; padding-bottom: 25px; margin-bottom: 25px; }
@@ -64,6 +76,26 @@
         .ayah-number-mark { color: #27ae60; font-size: 0.8em; vertical-align: super; margin-right: 5px; font-weight: bold; }
         .quran-font { font-family: 'Scheherazade New', 'Traditional Arabic', 'Arial', sans-serif; font-size: 28px; color: #2c3e50; letter-spacing: 0.5px; line-height: 2; }
         .single-ayah .quran-font { font-size: 42px; line-height: 1.8; }
+        
+        /* Tajweed Color Coding */
+        .tajweed-ghunnah { color: #9c27b0 !important; font-weight: bold !important; } /* Purple - Ghunnah */
+        .tajweed-idgham { color: #2196f3 !important; font-weight: bold !important; } /* Blue - Idgham */
+        .tajweed-ikhfa { color: #ff9800 !important; font-weight: bold !important; } /* Orange - Ikhfa */
+        .tajweed-iqlab { color: #795548 !important; font-weight: bold !important; } /* Brown - Iqlab */
+        .tajweed-qalqalah { color: #009688 !important; font-weight: bold !important; } /* Teal - Qalqalah */
+        .tajweed-madd { color: #4caf50 !important; font-weight: bold !important; text-decoration: underline !important; } /* Green - Madd */
+        .tajweed-waqf { color: #f44336 !important; } /* Red - Waqf */
+        .tajweed-sakt { color: #ff5722 !important; } /* Deep Orange - Sakt */
+        
+        /* Tajweed active mode */
+        .tajweed-active { background: linear-gradient(to right, rgba(156, 39, 176, 0.05), rgba(33, 150, 243, 0.05), rgba(76, 175, 80, 0.05)) !important; }
+        
+        /* Word-by-word styling */
+        .word-container { display: inline-block; text-align: center; margin: 0 2px; vertical-align: top; }
+        .word-arabic { cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
+        .word-arabic:hover { background: #e3f2fd; }
+        .word-transliteration { font-size: 10px; color: #666; margin-top: 2px; }
+        .word-tooltip { position: absolute; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; z-index: 1000; }
         .arabic-text { text-align: right; direction: rtl; }
         .translation-text { margin-top: 20px; font-size: 16px; line-height: 1.8; color: #555; font-style: italic; }
         .single-ayah .translation-text { font-size: 20px; margin-top: 30px; }
@@ -97,12 +129,43 @@
                             <button class="btn btn-success btn-sm w-100 mb-2" id="start-reading-btn">
                                 <i class="fa fa-play"></i> Start Reading
                             </button>
-                            <button class="btn btn-warning btn-sm w-100" id="bookmark-btn" disabled>
+                            <button class="btn btn-warning btn-sm w-100 mb-2" id="bookmark-btn" disabled>
                                 <i class="fa fa-bookmark"></i> Bookmark Reading
                             </button>
                             <div id="reading-status" class="text-center mt-2" style="font-size: 11px; display: none;">
                                 <span class="text-muted">Reading from: <b id="start-pos"></b></span>
                             </div>
+                        </div>
+                        
+                        <!-- Last Read Position -->
+                        <div class="last-read-box mb-2 p-2 bg-light rounded" id="last-read-box" style="display: none;">
+                            <h6 class="text-muted" style="font-size: 11px;">Last Read</h6>
+                            <div id="last-read-pos" class="fw-bold text-primary" style="font-size: 12px; cursor: pointer;"></div>
+                            <small class="text-muted" id="last-read-time" style="font-size: 10px;"></small>
+                        </div>
+                        
+                        <!-- Bookmarks List -->
+                        <div class="bookmarks-box mb-2 p-2 bg-light rounded">
+                            <h6 class="text-muted" style="font-size: 11px;">Bookmarks</h6>
+                            <div id="bookmarks-list" class="bookmarks-list" style="max-height: 120px; overflow-y: auto;">
+                                <small class="text-muted">No bookmarks yet</small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-xs w-100 mt-2" id="add-bookmark-btn" style="font-size: 10px; padding: 3px;">
+                                <i class="fa fa-bookmark"></i> Quick Bookmark
+                            </button>
+                        </div>
+                        
+                        <!-- Reading Stats -->
+                        <div class="stats-box mb-2 p-2 bg-light rounded">
+                            <h6 class="text-muted" style="font-size: 11px;">Today's Progress</h6>
+                            <div class="d-flex justify-content-between">
+                                <small style="font-size: 10px;">Ayahs Read: <b id="ayahs-count">0</b></small>
+                                <small style="font-size: 10px;">Time: <b id="reading-time">0 min</b></small>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar" id="daily-progress" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" style="font-size: 9px;">Goal: <span id="daily-goal">50</span> ayahs</small>
                         </div>
                         <div class="surah-list">
                             <h6>Surahs</h6>
@@ -131,6 +194,29 @@
                                             <i class="fa fa-align-center"></i> Single
                                         </button>
                                     </div>
+                                </div>
+                                <div class="audio-controls">
+                                    <select id="reciter-select" class="form-control form-control-sm" style="width: 150px; display: inline-block;">
+                                        <option value="mishary">Mishary Rashid</option>
+                                        <option value="sudais">Abdurrahman Sudais</option>
+                                        <option value="ghamdi">Saad Al Ghamdi</option>
+                                        <option value="shuraim">Saud Al Shuraim</option>
+                                        <option value="ajmi">Ahmed Al Ajmi</option>
+                                    </select>
+                                    <button class="btn btn-info btn-sm" id="play-current" title="Play Current Ayah">
+                                        <i class="fa fa-play"></i> Play
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" id="stop-audio" title="Stop Audio" style="display: none;">
+                                        <i class="fa fa-stop"></i> Stop
+                                    </button>
+                                </div>
+                                <div class="tajweed-toggle">
+                                    <button class="btn btn-outline-success btn-sm" id="tajweed-btn" title="Toggle Tajweed Colors">
+                                        Tajweed OFF
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" id="word-audio-btn" title="Word-by-Word Mode">
+                                        Word Audio OFF
+                                    </button>
                                 </div>
                                 <span id="current-position" class="mx-3 text-muted fw-bold"></span>
                             </div>
@@ -206,6 +292,12 @@
             // Load Surahs immediately
             loadSurahs();
             
+            // Initialize localStorage features
+            loadLastReadPosition();
+            loadBookmarks();
+            loadReadingStats();
+            trackReadingTime();
+            
             // Event Bindings
             $('#search-btn').on('click', searchAyahs);
             $('#start-reading-btn').on('click', startReadingSession);
@@ -214,6 +306,19 @@
             $('#next-ayah').on('click', nextAyah);
             $('#book-mode').on('click', function() { switchMode('book'); });
             $('#single-ayah-mode').on('click', function() { switchMode('single'); });
+            $('#add-bookmark-btn').on('click', addQuickBookmark);
+            $('#last-read-pos').on('click', function() {
+                var lastRead = JSON.parse(localStorage.getItem('quran_last_read') || '{}');
+                if (lastRead.surah && lastRead.ayah) {
+                    loadSurahAyahs(lastRead.surah, lastRead.ayah);
+                }
+            });
+            
+            // Tajweed toggle
+            $('#tajweed-btn').on('click', toggleTajweed);
+            
+            // Word-by-word audio toggle
+            $('#word-audio-btn').on('click', toggleWordAudio);
             
             // Search on Enter key
             $('#search-ayah').on('keypress', function(e) {
@@ -243,6 +348,143 @@
                         $('#surah-list').html('<div class="text-center text-danger p-3">Error loading surahs. Please refresh.</div>');
                     }
                 });
+            }
+            
+            // LocalStorage Functions - Last Read Position
+            function saveLastReadPosition(surah, ayah) {
+                var lastRead = {
+                    surah: surah,
+                    ayah: ayah,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('quran_last_read', JSON.stringify(lastRead));
+                updateLastReadDisplay(lastRead);
+            }
+            
+            function loadLastReadPosition() {
+                var lastRead = JSON.parse(localStorage.getItem('quran_last_read') || '{}');
+                if (lastRead.surah && lastRead.ayah) {
+                    updateLastReadDisplay(lastRead);
+                }
+            }
+            
+            function updateLastReadDisplay(lastRead) {
+                $('#last-read-box').show();
+                $('#last-read-pos').text(lastRead.surah + ':' + lastRead.ayah);
+                var timeAgo = getTimeAgo(lastRead.timestamp);
+                $('#last-read-time').text(timeAgo);
+            }
+            
+            function getTimeAgo(timestamp) {
+                if (!timestamp) return '';
+                var seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+                if (seconds < 60) return 'Just now';
+                var minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + ' min ago';
+                var hours = Math.floor(minutes / 60);
+                if (hours < 24) return hours + ' hours ago';
+                var days = Math.floor(hours / 24);
+                return days + ' days ago';
+            }
+            
+            // Bookmarks Functions
+            function loadBookmarks() {
+                var bookmarks = JSON.parse(localStorage.getItem('quran_bookmarks') || '[]');
+                renderBookmarksList(bookmarks);
+            }
+            
+            function addQuickBookmark() {
+                if (!currentSurah || !currentAyah) {
+                    alert('Please navigate to an ayah first');
+                    return;
+                }
+                
+                var bookmarks = JSON.parse(localStorage.getItem('quran_bookmarks') || '[]');
+                var note = prompt('Add a note for this bookmark (optional):') || '';
+                
+                var bookmark = {
+                    id: Date.now(),
+                    surah: currentSurah,
+                    ayah: currentAyah,
+                    note: note,
+                    timestamp: new Date().toISOString()
+                };
+                
+                bookmarks.unshift(bookmark);
+                localStorage.setItem('quran_bookmarks', JSON.stringify(bookmarks));
+                renderBookmarksList(bookmarks);
+                alert('Bookmark saved: ' + currentSurah + ':' + currentAyah);
+            }
+            
+            function removeBookmark(id) {
+                var bookmarks = JSON.parse(localStorage.getItem('quran_bookmarks') || '[]');
+                bookmarks = bookmarks.filter(function(b) { return b.id !== id; });
+                localStorage.setItem('quran_bookmarks', JSON.stringify(bookmarks));
+                renderBookmarksList(bookmarks);
+            }
+            
+            function renderBookmarksList(bookmarks) {
+                var html = '';
+                if (bookmarks.length === 0) {
+                    html = '<small class="text-muted">No bookmarks yet</small>';
+                } else {
+                    bookmarks.slice(0, 5).forEach(function(bookmark) {
+                        html += '<div class="bookmark-item" style="padding: 5px 0; border-bottom: 1px solid #eee; cursor: pointer;" ' +
+                            'onclick="loadSurahAyahs(\'' + bookmark.surah + '\', ' + bookmark.ayah + ')">' +
+                            '<div style="font-size: 11px; font-weight: bold;">' + bookmark.surah + ':' + bookmark.ayah + '</div>' +
+                            '<small class="text-muted" style="font-size: 9px;">' + (bookmark.note || 'No note') + '</small>' +
+                            '<button onclick="event.stopPropagation(); removeBookmark(' + bookmark.id + ')" ' +
+                            'style="float: right; background: none; border: none; color: #dc3545; font-size: 10px; cursor: pointer;">×</button>' +
+                            '</div>';
+                    });
+                }
+                $('#bookmarks-list').html(html);
+            }
+            
+            // Reading Stats Functions
+            function loadReadingStats() {
+                var today = new Date().toDateString();
+                var stats = JSON.parse(localStorage.getItem('quran_reading_stats') || '{}');
+                
+                if (stats.date !== today) {
+                    stats = { date: today, ayahs: 0, time: 0, goal: 50 };
+                }
+                
+                updateStatsDisplay(stats);
+                return stats;
+            }
+            
+            function updateReadingStats(ayahsRead, timeSpent) {
+                var today = new Date().toDateString();
+                var stats = JSON.parse(localStorage.getItem('quran_reading_stats') || '{}');
+                
+                if (stats.date !== today) {
+                    stats = { date: today, ayahs: 0, time: 0, goal: 50 };
+                }
+                
+                stats.ayahs += ayahsRead;
+                stats.time += timeSpent;
+                localStorage.setItem('quran_reading_stats', JSON.stringify(stats));
+                updateStatsDisplay(stats);
+            }
+            
+            function updateStatsDisplay(stats) {
+                $('#ayahs-count').text(stats.ayahs || 0);
+                $('#reading-time').text(Math.floor((stats.time || 0) / 60) + ' min');
+                $('#daily-goal').text(stats.goal || 50);
+                
+                var progress = Math.min(100, ((stats.ayahs || 0) / (stats.goal || 50)) * 100);
+                $('#daily-progress').css('width', progress + '%');
+            }
+            
+            function trackReadingTime() {
+                var startTime = Date.now();
+                var interval = setInterval(function() {
+                    if (currentSurah) {
+                        var elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        updateReadingStats(0, 1);
+                    }
+                }, 60000); // Update every minute
             }
             
             function renderSurahList(surahs) {
@@ -296,6 +538,9 @@
                             '<div class="ayah-header mb-4">' +
                             '<span class="badge badge-primary fs-6">' + currentSurah + ' : ' + currentAyahData.number_in_surah + '</span>' +
                             '<span class="badge badge-secondary ms-2">Page ' + (currentAyahData.page || 1) + '</span>' +
+                            '<button class="ayah-audio-btn" data-ayah="' + currentAyahData.number_in_surah + '" title="Play Audio">' +
+                            '<i class="fa fa-play"></i> Play' +
+                            '</button>' +
                             '</div>' +
                             '<div class="arabic-text quran-font mb-4" dir="rtl">' +
                             '<h2 class="mb-3">' + currentAyahData.text_arabic + '</h2>' +
@@ -313,6 +558,9 @@
                             '<div class="ayah-header mb-2">' +
                             '<span class="ayah-number-mark">' + ayah.number_in_surah + '</span>' +
                             '<span class="badge badge-light">' + currentSurah + ':' + ayah.number_in_surah + '</span>' +
+                            '<button class="ayah-audio-btn" data-ayah="' + ayah.number_in_surah + '" title="Play Audio">' +
+                            '<i class="fa fa-play"></i> Listen' +
+                            '</button>' +
                             '</div>' +
                             '<div class="arabic-text quran-font mb-3" dir="rtl">' +
                             '<h4>' + ayah.text_arabic + '</h4>' +
@@ -328,9 +576,22 @@
                 $('#ayah-display').html(html);
                 $('#search-results').addClass('d-none');
                 
+                // Bind audio button events
+                $('.ayah-audio-btn').on('click', function(e) {
+                    e.stopPropagation();
+                    var ayahNum = $(this).data('ayah');
+                    playAyahAudio(currentSurah, ayahNum);
+                });
+                
                 if (ayahs.length > 0) {
                     $('#current-position').text(currentSurah + ' : ' + ayahs[0].number_in_surah);
                 }
+                
+                // Save last read position
+                saveLastReadPosition(currentSurah, currentAyah);
+                
+                // Update reading stats (count ayahs read)
+                updateReadingStats(ayahs.length, 0);
             }
             
             function switchMode(mode) {
@@ -444,6 +705,277 @@
                     var ayah = $(this).data('ayah');
                     loadSurahAyahs(surah, parseInt(ayah));
                 });
+            }
+            
+            // Audio Player
+            var currentAudio = null;
+            var isPlaying = false;
+            var currentPlayingAyah = null;
+            
+            function playAyahAudio(surah, ayah) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                
+                var reciter = $('#reciter-select').val() || 'mishary';
+                var surahNumber = getSurahNumber(surah);
+                
+                if (!surahNumber) {
+                    console.error('Could not find surah number for:', surah);
+                    return;
+                }
+                
+                // Format: https://everyayah.com/data/Alafasy_64kbps/001001.mp3
+                var surahStr = surahNumber.toString().padStart(3, '0');
+                var ayahStr = ayah.toString().padStart(3, '0');
+                var audioUrl = 'https://everyayah.com/data/' + getReciterFolder(reciter) + '/' + surahStr + ayahStr + '.mp3';
+                
+                console.log('Playing audio:', audioUrl);
+                
+                currentAudio = new Audio(audioUrl);
+                currentPlayingAyah = ayah;
+                
+                // Update button states
+                $('.ayah-audio-btn').html('<i class="fa fa-play"></i> Listen').removeClass('playing');
+                $('.ayah-audio-btn[data-ayah="' + ayah + '"]').html('<i class="fa fa-pause"></i> Playing').addClass('playing');
+                $('#play-current').html('<i class="fa fa-pause"></i> Pause').removeClass('btn-info').addClass('btn-warning');
+                $('#stop-audio').show();
+                isPlaying = true;
+                
+                currentAudio.play().catch(function(error) {
+                    console.error('Audio playback error:', error);
+                    alert('Error playing audio. Please check your internet connection.');
+                    resetAudioButtons();
+                });
+                
+                currentAudio.onended = function() {
+                    resetAudioButtons();
+                    // Auto-play next ayah if in single mode
+                    if (readingMode === 'single' && currentSurah) {
+                        loadSurahAyahs(currentSurah, ayah + 1);
+                    }
+                };
+                
+                currentAudio.onerror = function() {
+                    console.error('Audio load error');
+                    resetAudioButtons();
+                };
+            }
+            
+            function stopAudio() {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                resetAudioButtons();
+            }
+            
+            function resetAudioButtons() {
+                $('.ayah-audio-btn').html('<i class="fa fa-play"></i> Listen').removeClass('playing');
+                $('#play-current').html('<i class="fa fa-play"></i> Play').removeClass('btn-warning').addClass('btn-info');
+                $('#stop-audio').hide();
+                isPlaying = false;
+                currentPlayingAyah = null;
+            }
+            
+            function getSurahNumber(surahName) {
+                var surah = surahList.find(function(s) { return s.name === surahName; });
+                return surah ? surah.number : null;
+            }
+            
+            function getReciterFolder(reciter) {
+                var folders = {
+                    'mishary': 'Alafasy_64kbps',
+                    'sudais': 'Abdurrahmaan_As-Sudais_64kbps',
+                    'ghamdi': 'Ghamadi_40kbps',
+                    'shuraim': 'Saood_ash-Shuraym_64kbps',
+                    'ajmi': 'Ahmed_ibn_Ali_al-Ajamy_64kbps'
+                };
+                return folders[reciter] || folders['mishary'];
+            }
+            
+            // Audio control event bindings
+            $('#play-current').on('click', function() {
+                if (isPlaying && currentAudio) {
+                    currentAudio.pause();
+                    resetAudioButtons();
+                } else if (currentSurah && currentAyah) {
+                    playAyahAudio(currentSurah, currentAyah);
+                }
+            });
+            
+            $('#stop-audio').on('click', stopAudio);
+            
+            $('#reciter-select').on('change', function() {
+                if (isPlaying) {
+                    stopAudio();
+                }
+            });
+            
+            // Tajweed Toggle Function
+            var tajweedEnabled = false;
+            function toggleTajweed() {
+                tajweedEnabled = !tajweedEnabled;
+                $('#tajweed-btn').text(tajweedEnabled ? 'Tajweed ON' : 'Tajweed OFF')
+                    .removeClass(tajweedEnabled ? 'btn-outline-success' : 'btn-success')
+                    .addClass(tajweedEnabled ? 'btn-success' : 'btn-outline-success');
+                
+                if (tajweedEnabled) {
+                    applyTajweedColors();
+                } else {
+                    removeTajweedColors();
+                }
+            }
+            
+            function applyTajweedColors() {
+                // Apply Tajweed color coding with visual feedback
+                $('.arabic-text h2, .arabic-text h4').each(function() {
+                    var originalText = $(this).text();
+                    
+                    // Create tajweed legend
+                    if ($('#tajweed-legend').length === 0) {
+                        var legend = '<div id="tajweed-legend" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 11px;">' +
+                            '<strong>Tajweed Rules:</strong> ' +
+                            '<span style="color: #9c27b0;">Ghunnah</span> | ' +
+                            '<span style="color: #2196f3;">Idgham</span> | ' +
+                            '<span style="color: #ff9800;">Ikhfa</span> | ' +
+                            '<span style="color: #795548;">Iqlab</span> | ' +
+                            '<span style="color: #009688;">Qalqalah</span> | ' +
+                            '<span style="color: #4caf50;">Madd</span>' +
+                            '</div>';
+                        $(this).before(legend);
+                    }
+                    
+                    // Apply simplified color coding based on Arabic letters
+                    // This is a basic implementation - full tajweed requires proper corpus
+                    var coloredText = applyBasicTajweedRules(originalText);
+                    $(this).html(coloredText);
+                    $(this).addClass('tajweed-active');
+                });
+            }
+            
+            function applyBasicTajweedRules(text) {
+                // Basic tajweed rule application (simplified)
+                var result = text;
+                
+                // Madd letters (green) - ا و ي with madd mark
+                result = result.replace(/([اوي])/g, '<span class="tajweed-madd">$1</span>');
+                
+                // Ghunnah (purple) - ن with shadda or noon sakin
+                result = result.replace(/(نْ)/g, '<span class="tajweed-ghunnah">$1</span>');
+                
+                // Qalqalah (teal) - ق ط ب ج د
+                result = result.replace(/([قطبجد])/g, '<span class="tajweed-qalqalah">$1</span>');
+                
+                // Idgham (blue) - ن followed by ي ن م و
+                result = result.replace(/ن([ينمو])/g, '<span class="tajweed-idgham">ن</span>$1');
+                
+                return result;
+            }
+            
+            function removeTajweedColors() {
+                $('#tajweed-legend').remove();
+                $('.arabic-text h2, .arabic-text h4').each(function() {
+                    $(this).removeClass('tajweed-active');
+                    // Restore original text without spans
+                    var text = $(this).text();
+                    $(this).text(text);
+                });
+            }
+            
+            // Word-by-Word Audio Toggle Function
+            var wordByWordEnabled = false;
+            function toggleWordAudio() {
+                wordByWordEnabled = !wordByWordEnabled;
+                $('#word-audio-btn').text(wordByWordEnabled ? 'Word Audio ON' : 'Word Audio OFF')
+                    .removeClass(wordByWordEnabled ? 'btn-outline-primary' : 'btn-primary')
+                    .addClass(wordByWordEnabled ? 'btn-primary' : 'btn-outline-primary');
+                
+                if (wordByWordEnabled) {
+                    enableWordByWordMode();
+                } else {
+                    disableWordByWordMode();
+                }
+            }
+            
+            function enableWordByWordMode() {
+                // Make each word clickable for audio playback
+                $('.arabic-text h2, .arabic-text h4').each(function() {
+                    var text = $(this).text();
+                    var words = text.split(' ');
+                    var html = '';
+                    
+                    words.forEach(function(word, index) {
+                        if (word.trim()) {
+                            html += '<span class="word-container" data-word="' + word + '">' +
+                                '<span class="word-arabic">' + word + '</span>' +
+                                '</span> ';
+                        }
+                    });
+                    
+                    $(this).html(html);
+                });
+                
+                // Bind click events to words
+                $('.word-arabic').on('click', function() {
+                    var word = $(this).parent().data('word');
+                    playWordAudio(word);
+                    
+                    // Visual feedback
+                    $(this).css('background', '#ffc107');
+                    setTimeout(function() {
+                        $(this).css('background', '');
+                    }.bind(this), 300);
+                });
+                
+                alert('Word-by-word mode enabled! Click on any Arabic word to hear its pronunciation.\n\nNote: Word audio requires additional word-level audio files.');
+            }
+            
+            function disableWordByWordMode() {
+                // Restore original text
+                if (currentSurah && currentAyah) {
+                    loadSurahAyahs(currentSurah, currentAyah);
+                }
+            }
+            
+            function playWordAudio(word) {
+                // This is a placeholder - real implementation needs word-level audio
+                console.log('Playing word audio for:', word);
+                
+                // For demonstration, use browser's speech synthesis
+                if ('speechSynthesis' in window) {
+                    var utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                } else {
+                    // Fallback: show tooltip
+                    showWordTooltip(word);
+                }
+            }
+            
+            function showWordTooltip(word) {
+                // Remove existing tooltips
+                $('.word-tooltip').remove();
+                
+                // Create tooltip
+                var tooltip = $('<div class="word-tooltip">Word: ' + word + '<br><small>Full word audio coming soon!</small></div>');
+                $('body').append(tooltip);
+                
+                // Position near mouse
+                $(document).on('mousemove.wordTooltip', function(e) {
+                    tooltip.css({
+                        left: e.pageX + 10,
+                        top: e.pageY + 10
+                    });
+                });
+                
+                // Remove after 2 seconds
+                setTimeout(function() {
+                    tooltip.remove();
+                    $(document).off('mousemove.wordTooltip');
+                }, 2000);
             }
             
             console.log('Quran Reader: Ready!');
