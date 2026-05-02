@@ -32,7 +32,7 @@ A beautiful Quran reading and search application built on the Frappe framework.
 ```bash
 # Get the app from the repository
 cd /path/to/your/frappe-bench
-bench get-app https://github.com/Musabikhan/quran_app.git --branch main
+bench get-app https://github.com/Musab1khan/quran_app.git --branch main
 
 # Install the app on your site
 bench --site your-site.local install-app quran_app
