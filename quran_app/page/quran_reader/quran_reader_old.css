@@ -1,0 +1,83 @@
+.quran-reader {
+    padding: 20px;
+}
+
+.quran-reader .sidebar {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.quran-reader .surah-list {
+    margin-top: 20px;
+}
+
+.quran-reader .surah-item {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quran-reader .surah-item:hover {
+    background-color: #e9ecef;
+}
+
+.quran-reader .ayah-display {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.quran-reader .ayah-card {
+    background: #fff;
+    border-left: 4px solid #28a745;
+    transition: all 0.2s;
+}
+
+.quran-reader .ayah-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quran-reader .arabic-text {
+    font-family: 'Traditional Arabic', 'Scheherazade', 'Arial', sans-serif;
+    line-height: 2;
+    color: #333;
+}
+
+.quran-reader .translation-text {
+    font-style: italic;
+    color: #666;
+}
+
+.quran-reader .search-results {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.quran-reader .ayah-result {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quran-reader .ayah-result:hover {
+    background: #f0f0f0;
+}
+
+.quran-reader .cursor-pointer {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .quran-reader .sidebar {
+        height: auto;
+        margin-bottom: 20px;
+    }
+    
+    .quran-reader .ayah-display {
+        max-height: none;
+    }
+}

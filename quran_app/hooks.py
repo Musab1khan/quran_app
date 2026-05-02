@@ -1,8 +1,8 @@
 app_name = "quran_app"
 app_title = "Quran App"
-app_publisher = "ERPNext"
+app_publisher = "Umair Wali"
 app_description = "Quran reading and search application"
-app_email = "admin@example.com"
+app_email = "umairwali6@gmail.com"
 app_license = "mit"
 
 # Apps
@@ -40,7 +40,7 @@ app_license = "mit"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {"quran-reader" : "page/quran_reader/quran_reader.js"}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}

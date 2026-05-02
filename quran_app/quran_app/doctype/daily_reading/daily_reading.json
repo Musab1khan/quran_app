@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DAILY-READING-{user}-{reading_date}-{####}",
+ "creation": "2024-05-02 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "reading_date",
+  "column_break_1",
+  "start_surah",
+  "start_ayah",
+  "end_surah",
+  "end_ayah",
+  "column_break_2",
+  "total_ayahs_read",
+  "notes"
+ ],
+ "fields": [
+  {
+   "default": "__user",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "reading_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Reading Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_surah",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Start Surah",
+   "options": "Surah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_ayah",
+   "fieldtype": "Int",
+   "label": "Start Ayah Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_surah",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "End Surah",
+   "options": "Surah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_ayah",
+   "fieldtype": "Int",
+   "label": "End Ayah Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_ayahs_read",
+   "fieldtype": "Int",
+   "label": "Total Ayahs Read",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-05-02 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Quran App",
+ "name": "Daily Reading",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "reading_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "user"
+}

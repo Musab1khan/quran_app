@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quran Reader</title>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .quran-layout { display: flex; min-height: 100vh; }
+        .col-sidebar { width: 280px; min-width: 280px; background: #fff; padding: 15px; border-right: 1px solid #ddd; }
+        .col-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .sidebar { height: 100vh; overflow-y: auto; }
+        .search-box { margin-bottom: 15px; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-outline-secondary { background: transparent; border: 1px solid #6c757d; color: #6c757d; }
+        .btn-outline-primary { background: transparent; border: 1px solid #007bff; color: #007bff; }
+        .btn-outline-primary.active { background: #007bff; color: white; }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .w-100 { width: 100%; }
+        .mb-2 { margin-bottom: 10px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mt-2 { margin-top: 10px; }
+        .p-2 { padding: 10px; }
+        .p-3 { padding: 15px; }
+        .p-4 { padding: 20px; }
+        .bg-light { background: #f8f9fa; }
+        .rounded { border-radius: 8px; }
+        .text-center { text-align: center; }
+        .text-muted { color: #6c757d; }
+        .fw-bold { font-weight: bold; }
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .reading-session-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 1px solid #dee2e6; }
+        .surah-list { margin-top: 15px; }
+        .surah-list h6 { color: #2c3e50; font-weight: 600; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #3498db; }
+        .list-group { display: flex; flex-direction: column; }
+        .surah-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; text-decoration: none; color: #333; display: block; }
+        .surah-item:hover { background: #e8f4f8; }
+        .surah-item h6 { color: #2c3e50; font-size: 14px; margin-bottom: 3px; border: none; padding: 0; }
+        .surah-item p { color: #27ae60; font-size: 16px; margin-bottom: 3px; }
+        .surah-item small { color: #6c757d; font-size: 12px; }
+        .main-content { background: #fff; border-radius: 8px; padding: 20px; min-height: calc(100vh - 60px); }
+        .reading-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .reading-modes { margin: 0 15px; }
+        #current-position { font-size: 14px; }
+        .ayah-display { min-height: 400px; }
+        .book-page { background: linear-gradient(to right, #fff 0%, #fafafa 50%, #fff 100%); padding: 30px; border-radius: 10px; box-shadow: inset 0 0 50px rgba(0,0,0,0.05); }
+        .book-ayah { border-bottom: 1px dashed #e0e0e0; padding-bottom: 25px; margin-bottom: 25px; }
+        .book-ayah:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .single-ayah { text-align: center; max-width: 800px; margin: 0 auto; }
+        .ayah-card { background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .ayah-header { margin-bottom: 20px; }
+        .ayah-header .badge { padding: 8px 15px; font-size: 14px; margin: 0 3px; border-radius: 20px; }
+        .badge-primary { background: #007bff; color: white; }
+        .badge-secondary { background: #6c757d; color: white; }
+        .badge-info { background: #17a2b8; color: white; }
+        .badge-light { background: #f8f9fa; color: #333; }
+        .ayah-number-mark { color: #27ae60; font-size: 0.8em; vertical-align: super; margin-right: 5px; font-weight: bold; }
+        .quran-font { font-family: 'Scheherazade New', 'Traditional Arabic', 'Arial', sans-serif; font-size: 28px; color: #2c3e50; letter-spacing: 0.5px; line-height: 2; }
+        .single-ayah .quran-font { font-size: 42px; line-height: 1.8; }
+        .arabic-text { text-align: right; direction: rtl; }
+        .translation-text { margin-top: 20px; font-size: 16px; line-height: 1.8; color: #555; font-style: italic; }
+        .single-ayah .translation-text { font-size: 20px; margin-top: 30px; }
+        .search-results { background: #fff; border-radius: 10px; padding: 20px; max-height: 600px; overflow-y: auto; }
+        .ayah-result { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
+        .ayah-result:hover { background: #f0f7ff; }
+        .d-none { display: none; }
+        .fa { font-style: normal; }
+        .fa-search:before { content: "🔍"; }
+        .fa-play:before { content: "▶"; }
+        .fa-bookmark:before { content: "🔖"; }
+        .fa-chevron-left:before { content: "◀"; }
+        .fa-chevron-right:before { content: "▶"; }
+        .fa-book:before { content: "📖"; }
+        .fa-align-center:before { content: "📄"; }
+        [disabled] { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div id="quran-reader-app">
+        <div class="quran-layout">
+            <div class="col-sidebar">
+                    <div class="sidebar">
+                        <div class="search-box mb-2">
+                            <input type="text" class="form-control" id="search-ayah" placeholder="Search ayahs...">
+                            <button class="btn btn-primary btn-sm mt-2 w-100" id="search-btn">
+                                <i class="fa fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="reading-session-box mb-2 p-2 bg-light rounded">
+                            <button class="btn btn-success btn-sm w-100 mb-2" id="start-reading-btn">
+                                <i class="fa fa-play"></i> Start Reading
+                            </button>
+                            <button class="btn btn-warning btn-sm w-100" id="bookmark-btn" disabled>
+                                <i class="fa fa-bookmark"></i> Bookmark Reading
+                            </button>
+                            <div id="reading-status" class="text-center mt-2" style="font-size: 11px; display: none;">
+                                <span class="text-muted">Reading from: <b id="start-pos"></b></span>
+                            </div>
+                        </div>
+                        <div class="surah-list">
+                            <h6>Surahs</h6>
+                            <div id="surah-list" class="list-group">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-content">
+                    <div class="main-content">
+                        <div class="reading-controls mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" id="prev-ayah">
+                                        <i class="fa fa-chevron-left"></i> Previous
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" id="next-ayah">
+                                        Next <i class="fa fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="reading-modes">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary active" id="book-mode" title="Book Mode">
+                                            <i class="fa fa-book"></i> Book
+                                        </button>
+                                        <button class="btn btn-outline-primary" id="single-ayah-mode" title="Single Ayah">
+                                            <i class="fa fa-align-center"></i> Single
+                                        </button>
+                                    </div>
+                                </div>
+                                <span id="current-position" class="mx-3 text-muted fw-bold"></span>
+                            </div>
+                        </div>
+                        <div id="ayah-display" class="ayah-display">
+                            <div class="text-center text-muted p-5">
+                                <i class="fa fa-book fa-3x mb-3"></i>
+                                <h4>Welcome to Quran Reader</h4>
+                                <p>Select a Surah from the sidebar to begin reading</p>
+                            </div>
+                        </div>
+                        <div id="search-results" class="search-results d-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Include Frappe API
+        window.frappe = {
+            call: function(options) {
+                var dfd = $.Deferred();
+                var url = '/api/method/' + options.method;
+                if (options.args) {
+                    url += '?' + $.param(options.args);
+                }
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log('API Success:', options.method, data);
+                        if (options.callback) options.callback(data);
+                        dfd.resolve(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('API Error:', options.method, error);
+                        if (options.error) options.error(xhr, status, error);
+                        dfd.reject(xhr, status, error);
+                    }
+                });
+                return dfd.promise();
+            },
+            msgprint: function(msg) {
+                alert(msg);
+            },
+            show_alert: function(options) {
+                console.log('Alert:', options.message);
+            },
+            confirm: function(message, on_confirm) {
+                if (confirm(message)) on_confirm();
+            },
+            session: {
+                user: 'Administrator'
+            }
+        };
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Complete Quran Reader Application
+        $(document).ready(function() {
+            console.log('Quran Reader: Initializing...');
+            
+            // State
+            var currentSurah = null;
+            var currentAyah = 1;
+            var readingStart = null;
+            var readingMode = 'book';
+            var ayahsPerPage = 10;
+            var surahList = [];
+            
+            // Load Surahs immediately
+            loadSurahs();
+            
+            // Event Bindings
+            $('#search-btn').on('click', searchAyahs);
+            $('#start-reading-btn').on('click', startReadingSession);
+            $('#bookmark-btn').on('click', bookmarkReading);
+            $('#prev-ayah').on('click', prevAyah);
+            $('#next-ayah').on('click', nextAyah);
+            $('#book-mode').on('click', function() { switchMode('book'); });
+            $('#single-ayah-mode').on('click', function() { switchMode('single'); });
+            
+            // Search on Enter key
+            $('#search-ayah').on('keypress', function(e) {
+                if (e.which === 13) searchAyahs();
+            });
+            
+            // Functions
+            function loadSurahs() {
+                console.log('Loading surahs...');
+                $('#surah-list').html('<div class="text-center p-3"><i>Loading...</i></div>');
+                
+                $.ajax({
+                    url: '/api/method/quran_app.api.quran.get_surah_list',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Surahs loaded:', response);
+                        if (response.message && response.message.length > 0) {
+                            surahList = response.message;
+                            renderSurahList(surahList);
+                        } else {
+                            $('#surah-list').html('<div class="text-center text-muted p-3">No surahs found</div>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading surahs:', error);
+                        $('#surah-list').html('<div class="text-center text-danger p-3">Error loading surahs. Please refresh.</div>');
+                    }
+                });
+            }
+            
+            function renderSurahList(surahs) {
+                var html = '';
+                surahs.forEach(function(surah) {
+                    html += '<a href="#" class="surah-item" data-surah="' + surah.name + '">' +
+                        '<h6>' + surah.number + '. ' + surah.name_en + '</h6>' +
+                        '<p>' + surah.name_ar + '</p>' +
+                        '<small>' + surah.ayah_count + ' ayahs • ' + surah.type + '</small>' +
+                        '</a>';
+                });
+                $('#surah-list').html(html);
+                
+                // Bind click events
+                $('.surah-item').on('click', function(e) {
+                    e.preventDefault();
+                    var surah = $(this).data('surah');
+                    loadSurahAyahs(surah, 1);
+                });
+            }
+            
+            function loadSurahAyahs(surah, startAyah) {
+                currentSurah = surah;
+                currentAyah = startAyah;
+                var limit = readingMode === 'single' ? 1 : ayahsPerPage;
+                
+                $.ajax({
+                    url: '/api/method/quran_app.api.quran.get_ayahs_by_surah?surah=' + encodeURIComponent(surah) + '&start_ayah=' + startAyah + '&end_ayah=' + (parseInt(startAyah) + parseInt(limit) - 1),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.message && response.message.length > 0) {
+                            displayAyahs(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading ayahs:', error);
+                        $('#ayah-display').html('<div class="text-center text-danger p-5">Error loading ayahs</div>');
+                    }
+                });
+            }
+            
+            function displayAyahs(ayahs) {
+                var html = '';
+                
+                if (readingMode === 'single') {
+                    var currentAyahData = ayahs.find(function(a) { return a.number_in_surah == currentAyah; });
+                    if (currentAyahData) {
+                        html = '<div class="book-page single-ayah">' +
+                            '<div class="ayah-card text-center">' +
+                            '<div class="ayah-header mb-4">' +
+                            '<span class="badge badge-primary fs-6">' + currentSurah + ' : ' + currentAyahData.number_in_surah + '</span>' +
+                            '<span class="badge badge-secondary ms-2">Page ' + (currentAyahData.page || 1) + '</span>' +
+                            '</div>' +
+                            '<div class="arabic-text quran-font mb-4" dir="rtl">' +
+                            '<h2 class="mb-3">' + currentAyahData.text_arabic + '</h2>' +
+                            '</div>' +
+                            '<div class="translation-text">' +
+                            '<p class="fs-5 text-muted fst-italic">' + (currentAyahData.text_translation || 'No translation available') + '</p>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                    }
+                } else {
+                    html = '<div class="book-page">';
+                    ayahs.forEach(function(ayah) {
+                        html += '<div class="book-ayah" data-surah="' + currentSurah + '" data-ayah="' + ayah.number_in_surah + '">' +
+                            '<div class="ayah-header mb-2">' +
+                            '<span class="ayah-number-mark">' + ayah.number_in_surah + '</span>' +
+                            '<span class="badge badge-light">' + currentSurah + ':' + ayah.number_in_surah + '</span>' +
+                            '</div>' +
+                            '<div class="arabic-text quran-font mb-3" dir="rtl">' +
+                            '<h4>' + ayah.text_arabic + '</h4>' +
+                            '</div>' +
+                            '<div class="translation-text">' +
+                            '<p class="text-muted">' + (ayah.text_translation || 'No translation available') + '</p>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                $('#ayah-display').html(html);
+                $('#search-results').addClass('d-none');
+                
+                if (ayahs.length > 0) {
+                    $('#current-position').text(currentSurah + ' : ' + ayahs[0].number_in_surah);
+                }
+            }
+            
+            function switchMode(mode) {
+                readingMode = mode;
+                $('#book-mode').toggleClass('active', mode === 'book');
+                $('#single-ayah-mode').toggleClass('active', mode === 'single');
+                if (currentSurah) {
+                    loadSurahAyahs(currentSurah, currentAyah);
+                }
+            }
+            
+            function startReadingSession() {
+                if (!currentSurah) {
+                    alert('Please select a Surah first');
+                    return;
+                }
+                readingStart = { surah: currentSurah, ayah: currentAyah };
+                $('#start-reading-btn').html('▶ Reading...').removeClass('btn-success').addClass('btn-info');
+                $('#bookmark-btn').prop('disabled', false);
+                $('#reading-status').show();
+                $('#start-pos').text(currentSurah + ':' + currentAyah);
+                alert('Reading session started from ' + currentSurah + ':' + currentAyah);
+            }
+            
+            function bookmarkReading() {
+                if (!readingStart) {
+                    alert('Please start a reading session first');
+                    return;
+                }
+                if (!currentSurah || !currentAyah) {
+                    alert('Please navigate to an ayah first');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/method/quran_app.api.quran.create_daily_reading?start_surah=' + encodeURIComponent(readingStart.surah) + 
+                         '&start_ayah=' + readingStart.ayah + 
+                         '&end_surah=' + encodeURIComponent(currentSurah) + 
+                         '&end_ayah=' + currentAyah,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.message) {
+                            readingStart = null;
+                            $('#start-reading-btn').html('▶ Start Reading').removeClass('btn-info').addClass('btn-success');
+                            $('#bookmark-btn').prop('disabled', true);
+                            $('#reading-status').hide();
+                            alert('Reading bookmarked successfully! Record: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error creating bookmark:', error);
+                        alert('Error saving bookmark');
+                    }
+                });
+            }
+            
+            function prevAyah() {
+                if (currentSurah && currentAyah > 1) {
+                    loadSurahAyahs(currentSurah, currentAyah - 1);
+                }
+            }
+            
+            function nextAyah() {
+                if (currentSurah) {
+                    loadSurahAyahs(currentSurah, currentAyah + 1);
+                }
+            }
+            
+            function searchAyahs() {
+                var query = $('#search-ayah').val().trim();
+                if (!query) {
+                    alert('Please enter a search term');
+                    return;
+                }
+                
+                $('#ayah-display').html('<div class="text-center p-5"><i>Searching...</i></div>');
+                
+                $.ajax({
+                    url: '/api/method/quran_app.api.quran.search_ayahs?query=' + encodeURIComponent(query),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.message && response.message.length > 0) {
+                            displaySearchResults(response.message);
+                        } else {
+                            $('#ayah-display').html('<div class="text-center text-muted p-5">No results found</div>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error searching:', error);
+                        $('#ayah-display').html('<div class="text-center text-danger p-5">Error searching</div>');
+                    }
+                });
+            }
+            
+            function displaySearchResults(results) {
+                var html = '<div class="search-results"><h4>Search Results</h4>';
+                results.forEach(function(ayah) {
+                    html += '<div class="ayah-result" data-surah="' + ayah.surah + '" data-ayah="' + ayah.number_in_surah + '">' +
+                        '<div class="arabic-text" dir="rtl">' + ayah.text_arabic + '</div>' +
+                        '<div class="translation-text">' + (ayah.text_translation || '') + '</div>' +
+                        '<small>' + ayah.surah + ':' + ayah.number_in_surah + '</small>' +
+                        '</div>';
+                });
+                html += '</div>';
+                $('#ayah-display').html(html);
+                
+                $('.ayah-result').on('click', function() {
+                    var surah = $(this).data('surah');
+                    var ayah = $(this).data('ayah');
+                    loadSurahAyahs(surah, parseInt(ayah));
+                });
+            }
+            
+            console.log('Quran Reader: Ready!');
+        });
+    </script>
+</body>
+</html>
